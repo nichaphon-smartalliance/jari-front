@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: false; /* only register our custom themes below */
+}
+
+/* ─── Jari — pastel light (default) ──────────────────────────────────────── */
+@plugin "daisyui/theme" {
+  name: "jari";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  /* neutral canvas with a faint cool tint — not stark white */
+  --color-base-100: oklch(99% 0.004 286);
+  --color-base-200: oklch(97% 0.006 286);
+  --color-base-300: oklch(93.5% 0.009 286);
+  --color-base-content: oklch(37% 0.03 279); /* deep slate, never pure black */
+
+  /* primary: soft modern violet, light text for crisp CTAs */
+  --color-primary: oklch(66% 0.15 285);
+  --color-primary-content: oklch(98% 0.01 285);
+
+  /* secondary: pastel rose */
+  --color-secondary: oklch(72% 0.12 350);
+  --color-secondary-content: oklch(99% 0.01 350);
+
+  /* accent: pastel mint */
+  --color-accent: oklch(78% 0.11 185);
+  --color-accent-content: oklch(33% 0.05 195);
+
+  --color-neutral: oklch(45% 0.03 282);
+  --color-neutral-content: oklch(97% 0.01 282);
+
+  /* status colors: soft pastels with dark same-hue text (no harsh fills) */
+  --color-info: oklch(84% 0.07 235);
+  --color-info-content: oklch(37% 0.07 245);
+  --color-success: oklch(84% 0.10 158);
+  --color-success-content: oklch(35% 0.07 158);
+  --color-warning: oklch(89% 0.08 88);
+  --color-warning-content: oklch(42% 0.06 72);
+  --color-error: oklch(80% 0.10 22);
+  --color-error-content: oklch(37% 0.10 22);
+
+  /* generous, modern rounding + soft depth */
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* ─── Jari — pastel dark ──────────────────────────────────────────────────── */
+@plugin "daisyui/theme" {
+  name: "jarinight";
+  default: false;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: oklch(25% 0.02 282);
+  --color-base-200: oklch(22% 0.02 282);
+  --color-base-300: oklch(30% 0.025 282);
+  --color-base-content: oklch(92% 0.02 286);
+
+  --color-primary: oklch(72% 0.14 285);
+  --color-primary-content: oklch(21% 0.04 285);
+  --color-secondary: oklch(74% 0.11 350);
+  --color-secondary-content: oklch(21% 0.04 350);
+  --color-accent: oklch(78% 0.10 185);
+  --color-accent-content: oklch(22% 0.04 195);
+
+  --color-neutral: oklch(36% 0.02 282);
+  --color-neutral-content: oklch(92% 0.02 282);
+
+  --color-info: oklch(72% 0.09 235);
+  --color-info-content: oklch(20% 0.04 245);
+  --color-success: oklch(76% 0.11 158);
+  --color-success-content: oklch(20% 0.05 158);
+  --color-warning: oklch(82% 0.10 88);
+  --color-warning-content: oklch(24% 0.06 72);
+  --color-error: oklch(72% 0.12 22);
+  --color-error-content: oklch(20% 0.06 22);
+
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/* subtle ambient background so cards read as elevated */
+body {
+  background-image: radial-gradient(
+      120% 120% at 100% 0%,
+      color-mix(in oklch, var(--color-primary) 7%, transparent),
+      transparent 45%
+    ),
+    radial-gradient(
+      120% 120% at 0% 100%,
+      color-mix(in oklch, var(--color-secondary) 7%, transparent),
+      transparent 45%
+    );
+  min-height: 100vh;
+}
