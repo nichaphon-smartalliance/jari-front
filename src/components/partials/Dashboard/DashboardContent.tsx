@@ -9,6 +9,9 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { PageHeader, LoadingBlock, ErrorBlock } from "@/components/common";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { ProgressBar, RadialProgress } from "@/components/ui/Feedback";
 import { useDashboard } from "@/hooks/jari";
 import type { DashboardData } from "@/types/app/jira";
 
@@ -23,17 +26,18 @@ export default function DashboardContent() {
       <PageHeader
         title="ภาพรวม Sprint & Performance"
         subtitle="สุขภาพของ sprint ปัจจุบันและประสิทธิภาพของทีม"
-        icon={<LayoutDashboard size={26} />}
+        icon={<LayoutDashboard size={22} />}
       />
       <KpiRow data={data} />
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-3">
         <TrendCard data={data} />
-        <SprintCard data={data} />
+        <RatesCard data={data} />
       </div>
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
         <WorkloadCard data={data} />
         <ProjectsCard data={data} />
       </div>
+      <SprintCard data={data} />
     </div>
   );
 }
@@ -41,200 +45,180 @@ export default function DashboardContent() {
 function KpiRow({ data }: { data: DashboardData }) {
   const k = data.kpis;
   const items = [
-    { label: "งานทั้งหมด", value: k.totalIssues, icon: Activity, cls: "text-info" },
-    { label: "เสร็จแล้ว", value: k.completed, icon: CheckCircle2, cls: "text-success" },
-    { label: "กำลังทำ", value: k.inProgress, icon: Clock, cls: "text-warning" },
-    { label: "เกินกำหนด/บล็อก", value: k.blockedOrOverdue, icon: AlertTriangle, cls: "text-error" },
+    { label: "งานทั้งหมด", value: k.totalIssues, icon: Activity, tone: "bg-brand-50 text-brand-600" },
+    { label: "เสร็จแล้ว", value: k.completed, icon: CheckCircle2, tone: "bg-success-50 text-success-600" },
+    { label: "กำลังทำ", value: k.inProgress, icon: Clock, tone: "bg-blue-50 text-blue-600" },
+    { label: "เกินกำหนด/บล็อก", value: k.blockedOrOverdue, icon: AlertTriangle, tone: "bg-error-50 text-error-600" },
   ];
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((it) => (
-        <div key={it.label} className="card bg-base-100 border-base-300 border shadow-sm">
-          <div className="card-body flex-row items-center justify-between p-4">
-            <div>
-              <div className="text-base-content/60 text-xs">{it.label}</div>
-              <div className="text-3xl font-bold">{it.value}</div>
-            </div>
-            <it.icon className={it.cls} size={28} />
+        <Card key={it.label} className="flex items-center justify-between">
+          <div>
+            <div className="text-sm text-gray-600">{it.label}</div>
+            <div className="mt-1 text-3xl font-semibold text-gray-900">{it.value}</div>
           </div>
-        </div>
+          <span className={`grid h-11 w-11 place-items-center rounded-lg ${it.tone}`}>
+            <it.icon size={22} />
+          </span>
+        </Card>
       ))}
-      <div className="card bg-primary text-primary-content sm:col-span-2 lg:col-span-4">
-        <div className="card-body flex-row items-center justify-around gap-4 p-4">
-          <Gauge label="อัตราเสร็จงาน" value={k.completionRate} />
-          <div className="bg-primary-content/20 h-12 w-px" />
-          <Gauge label="อัตราตรงเวลา" value={k.onTimeRate} />
-        </div>
-      </div>
     </div>
   );
 }
 
-function Gauge({ label, value }: { label: string; value: number }) {
+function RatesCard({ data }: { data: DashboardData }) {
+  const k = data.kpis;
   return (
-    <div className="flex items-center gap-3">
-      <div
-        className="radial-progress"
-        style={{ "--value": value, "--size": "3.5rem" } as React.CSSProperties}
-        role="progressbar"
-      >
-        {value}%
+    <Card>
+      <h2 className="text-sm font-semibold text-gray-900">อัตราการทำงาน</h2>
+      <div className="mt-4 flex items-center justify-around">
+        <div className="flex flex-col items-center gap-2">
+          <RadialProgress value={k.completionRate} barClass="text-brand-600" />
+          <span className="text-xs font-medium text-gray-600">อัตราเสร็จงาน</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <RadialProgress value={k.onTimeRate} barClass="text-success-600" />
+          <span className="text-xs font-medium text-gray-600">อัตราตรงเวลา</span>
+        </div>
       </div>
-      <span className="text-sm font-medium">{label}</span>
-    </div>
+    </Card>
   );
 }
 
 function TrendCard({ data }: { data: DashboardData }) {
-  const max = Math.max(...data.trend.flatMap((t) => [t.created, t.completed]));
+  const max = Math.max(1, ...data.trend.flatMap((t) => [t.created, t.completed]));
   return (
-    <div className="card bg-base-100 border-base-300 border shadow-sm">
-      <div className="card-body">
-        <h2 className="card-title text-base">
-          <TrendingUp size={18} /> งานที่สร้าง vs งานที่เสร็จ (6 เดือน)
-        </h2>
-        <div className="flex h-44 items-end justify-between gap-2 pt-4">
-          {data.trend.map((t) => (
-            <div key={t.month} className="flex flex-1 flex-col items-center gap-1">
-              <div className="flex h-36 w-full items-end justify-center gap-1">
-                <div
-                  className="bg-info/50 w-1/2 rounded-t-lg transition-all"
-                  style={{ height: `${(t.created / max) * 100}%` }}
-                  title={`สร้าง ${t.created}`}
-                />
-                <div
-                  className="bg-success w-1/2 rounded-t-lg transition-all"
-                  style={{ height: `${(t.completed / max) * 100}%` }}
-                  title={`เสร็จ ${t.completed}`}
-                />
-              </div>
-              <span className="text-base-content/60 text-xs">{t.month}</span>
+    <Card className="lg:col-span-2">
+      <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+        <TrendingUp size={18} className="text-gray-400" /> งานที่สร้าง vs งานที่เสร็จ (6 เดือน)
+      </h2>
+      <div className="mt-5 flex h-44 items-end justify-between gap-3">
+        {data.trend.map((t) => (
+          <div key={t.month} className="flex flex-1 flex-col items-center gap-2">
+            <div className="flex h-36 w-full items-end justify-center gap-1.5">
+              <div
+                className="w-1/2 rounded-t-md bg-blue-200 transition-all"
+                style={{ height: `${(t.created / max) * 100}%` }}
+                title={`สร้าง ${t.created}`}
+              />
+              <div
+                className="w-1/2 rounded-t-md bg-brand-600 transition-all"
+                style={{ height: `${(t.completed / max) * 100}%` }}
+                title={`เสร็จ ${t.completed}`}
+              />
             </div>
-          ))}
-        </div>
-        <div className="text-base-content/60 flex gap-4 text-xs">
-          <span className="flex items-center gap-1">
-            <span className="bg-info/40 inline-block h-2 w-3 rounded" /> สร้าง
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="bg-success inline-block h-2 w-3 rounded" /> เสร็จ
-          </span>
-        </div>
+            <span className="text-xs text-gray-500">{t.month}</span>
+          </div>
+        ))}
       </div>
-    </div>
+      <div className="mt-3 flex gap-4 text-xs text-gray-500">
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-2 w-3 rounded bg-blue-200" /> สร้าง
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-2 w-3 rounded bg-brand-600" /> เสร็จ
+        </span>
+      </div>
+    </Card>
   );
 }
 
 function SprintCard({ data }: { data: DashboardData }) {
   const s = data.sprint;
   const rows = [
-    { label: "Committed", value: s.committed, max: s.committed, cls: "progress-info" },
-    { label: "Completed", value: s.completed, max: s.committed, cls: "progress-success" },
-    { label: "Carryover", value: s.carryover, max: s.committed, cls: "progress-warning" },
+    { label: "Committed", value: s.committed, color: "brand" as const },
+    { label: "Completed", value: s.completed, color: "success" as const },
+    { label: "Carryover", value: s.carryover, color: "warning" as const },
   ];
   return (
-    <div className="card bg-base-100 border-base-300 border shadow-sm">
-      <div className="card-body">
-        <h2 className="card-title text-base">{s.name} — ความคืบหน้า</h2>
-        <div className="space-y-3 pt-2">
-          {rows.map((r) => (
-            <div key={r.label}>
-              <div className="mb-1 flex justify-between text-sm">
-                <span>{r.label}</span>
-                <span className="font-semibold">{r.value}</span>
-              </div>
-              <progress className={`progress ${r.cls} w-full`} value={r.value} max={r.max} />
+    <Card>
+      <h2 className="text-sm font-semibold text-gray-900">{s.name} — ความคืบหน้า</h2>
+      <div className="mt-4 grid gap-4 sm:grid-cols-3">
+        {rows.map((r) => (
+          <div key={r.label}>
+            <div className="mb-1.5 flex justify-between text-sm">
+              <span className="text-gray-600">{r.label}</span>
+              <span className="font-semibold text-gray-900">{r.value}</span>
             </div>
-          ))}
-        </div>
+            <ProgressBar value={r.value} max={s.committed} color={r.color} />
+          </div>
+        ))}
       </div>
-    </div>
+    </Card>
   );
 }
 
 function WorkloadCard({ data }: { data: DashboardData }) {
   return (
-    <div className="card bg-base-100 border-base-300 border shadow-sm">
-      <div className="card-body">
-        <h2 className="card-title text-base">ภาระงานของทีม</h2>
-        <div className="overflow-x-auto">
-          <table className="table table-sm">
-            <thead>
-              <tr>
-                <th>สมาชิก</th>
-                <th className="text-center">To Do</th>
-                <th className="text-center">ทำอยู่</th>
-                <th className="text-center">เสร็จ</th>
-                <th className="text-right">วันนี้</th>
+    <Card padded={false}>
+      <h2 className="border-b border-gray-200 p-5 text-sm font-semibold text-gray-900">
+        ภาระงานของทีม
+      </h2>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-200 bg-gray-50 text-xs font-medium text-gray-600">
+              <th className="px-5 py-2.5 text-left">สมาชิก</th>
+              <th className="px-3 py-2.5 text-center">To Do</th>
+              <th className="px-3 py-2.5 text-center">ทำอยู่</th>
+              <th className="px-3 py-2.5 text-center">เสร็จ</th>
+              <th className="px-5 py-2.5 text-right">วันนี้</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {data.workload.slice(0, 10).map((w) => (
+              <tr key={w.accountId} className="hover:bg-gray-50">
+                <td className="px-5 py-2.5 font-medium text-gray-900">{w.displayName}</td>
+                <td className="px-3 py-2.5 text-center text-gray-600">{w.todo}</td>
+                <td className="px-3 py-2.5 text-center text-gray-600">{w.inProgress}</td>
+                <td className="px-3 py-2.5 text-center text-gray-600">{w.done}</td>
+                <td className="px-5 py-2.5 text-right">
+                  <Badge
+                    color={
+                      w.loggedHoursToday >= 8
+                        ? "success"
+                        : w.loggedHoursToday === 0
+                          ? "gray"
+                          : "warning"
+                    }
+                  >
+                    {w.loggedHoursToday}h
+                  </Badge>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {data.workload.map((w) => (
-                <tr key={w.accountId}>
-                  <td className="font-medium">{w.displayName}</td>
-                  <td className="text-center">{w.todo}</td>
-                  <td className="text-center">{w.inProgress}</td>
-                  <td className="text-center">{w.done}</td>
-                  <td className="text-right">
-                    <span
-                      className={`badge badge-sm ${
-                        w.loggedHoursToday >= 8
-                          ? "badge-success"
-                          : w.loggedHoursToday === 0
-                            ? "badge-ghost"
-                            : "badge-warning"
-                      }`}
-                    >
-                      {w.loggedHoursToday}h
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </div>
+    </Card>
   );
 }
 
 function ProjectsCard({ data }: { data: DashboardData }) {
   return (
-    <div className="card bg-base-100 border-base-300 border shadow-sm">
-      <div className="card-body">
-        <h2 className="card-title text-base">สุขภาพแต่ละโปรเจค</h2>
-        <div className="space-y-4 pt-2">
-          {data.projects.map((p) => (
-            <div key={p.projectKey}>
-              <div className="mb-1 flex items-center justify-between text-sm">
-                <span className="font-medium">
-                  {p.projectName}{" "}
-                  <span className="text-base-content/50">({p.projectKey})</span>
-                </span>
-                <span
-                  className={`badge badge-sm ${
-                    p.healthScore >= 70
-                      ? "badge-success"
-                      : p.healthScore >= 40
-                        ? "badge-warning"
-                        : "badge-error"
-                  }`}
-                >
-                  {p.healthScore}
-                </span>
-              </div>
-              <progress
-                className="progress progress-primary w-full"
-                value={p.done}
-                max={p.total}
-              />
-              <div className="text-base-content/60 mt-0.5 text-xs">
-                เสร็จ {p.done}/{p.total} · เกินกำหนด {p.overdue}
-              </div>
+    <Card>
+      <h2 className="text-sm font-semibold text-gray-900">สุขภาพแต่ละโปรเจค</h2>
+      <div className="mt-4 space-y-4">
+        {data.projects.slice(0, 6).map((p) => (
+          <div key={p.projectKey}>
+            <div className="mb-1.5 flex items-center justify-between text-sm">
+              <span className="font-medium text-gray-900">
+                {p.projectName} <span className="text-gray-400">({p.projectKey})</span>
+              </span>
+              <Badge
+                color={p.healthScore >= 70 ? "success" : p.healthScore >= 40 ? "warning" : "error"}
+              >
+                {p.healthScore}
+              </Badge>
             </div>
-          ))}
-        </div>
+            <ProgressBar value={p.done} max={p.total} color="brand" />
+            <div className="mt-1 text-xs text-gray-500">
+              เสร็จ {p.done}/{p.total} · เกินกำหนด {p.overdue}
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
+    </Card>
   );
 }

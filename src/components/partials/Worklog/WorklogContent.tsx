@@ -3,6 +3,10 @@
 import { useMemo, useState } from "react";
 import { CheckCircle2, Sparkles, Timer } from "lucide-react";
 import { PageHeader, LoadingBlock, ErrorBlock, EmptyBlock } from "@/components/common";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Field";
+import { ProgressBar } from "@/components/ui/Feedback";
 import {
   useCreateWorklog,
   useDailyData,
@@ -83,17 +87,17 @@ export default function WorklogContent() {
       <PageHeader
         title="ลงเวลางาน (Worklog)"
         subtitle={`${user?.displayName ?? ""} · ${today} — ดึง Sub-task ที่ Done แต่ยังไม่ลงเวลา`}
-        icon={<Timer size={26} />}
+        icon={<Timer size={22} />}
         actions={
           list.length > 0 ? (
-            <button className="btn btn-secondary btn-sm gap-1" onClick={onAiFill} disabled={plan.isPending}>
-              {plan.isPending ? (
-                <span className="loading loading-spinner loading-xs" />
-              ) : (
-                <Sparkles size={16} />
-              )}
+            <Button
+              size="sm"
+              onClick={onAiFill}
+              loading={plan.isPending}
+              iconLeft={!plan.isPending && <Sparkles size={16} />}
+            >
               AI ลงเวลาให้ครบ 8 ชม.
-            </button>
+            </Button>
           ) : undefined
         }
       />
@@ -101,55 +105,48 @@ export default function WorklogContent() {
       <ProgressCard logged={loggedSeconds} projected={projected} />
 
       {list.length === 0 ? (
-        <EmptyBlock label="ไม่มี Sub-task ที่ Done ค้างลงเวลา 🎉" icon={<CheckCircle2 size={36} />} />
+        <EmptyBlock label="ไม่มี Sub-task ที่ Done ค้างลงเวลา 🎉" icon={<CheckCircle2 size={32} />} />
       ) : (
         <>
           <div className="space-y-3">
             {list.map((issue) => {
               const d = drafts[issue.key] ?? { timeSpent: "", comment: "" };
               return (
-                <div key={issue.key} className="card bg-base-100 border-base-300 border shadow-sm">
-                  <div className="card-body gap-3 p-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base-content/50 font-mono text-xs">{issue.key}</span>
-                      <span className="badge badge-success badge-xs">Done</span>
-                      {issue.parentKey && (
-                        <span className="text-base-content/40 text-xs">↳ {issue.parentKey}</span>
-                      )}
-                    </div>
-                    <div className="font-medium">{issue.summary}</div>
-                    <div className="grid gap-2 sm:grid-cols-[140px_1fr]">
-                      <input
-                        className="input input-bordered input-sm"
-                        placeholder="เช่น 3h 30m"
-                        value={d.timeSpent}
-                        onChange={(e) => setDraft(issue.key, { timeSpent: e.target.value })}
-                      />
-                      <input
-                        className="input input-bordered input-sm"
-                        placeholder="คอมเมนต์ (อะไรที่ทำไป)"
-                        value={d.comment}
-                        onChange={(e) => setDraft(issue.key, { comment: e.target.value })}
-                      />
-                    </div>
+                <Card key={issue.key} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs text-gray-500">{issue.key}</span>
+                    <span className="rounded-full bg-success-50 px-1.5 py-0.5 text-[10px] font-medium text-success-700">
+                      Done
+                    </span>
+                    {issue.parentKey && (
+                      <span className="text-xs text-gray-400">↳ {issue.parentKey}</span>
+                    )}
                   </div>
-                </div>
+                  <div className="text-sm font-medium text-gray-900">{issue.summary}</div>
+                  <div className="grid gap-2 sm:grid-cols-[150px_1fr]">
+                    <Input
+                      placeholder="เช่น 3h 30m"
+                      value={d.timeSpent}
+                      onChange={(e) => setDraft(issue.key, { timeSpent: e.target.value })}
+                    />
+                    <Input
+                      placeholder="คอมเมนต์ (อะไรที่ทำไป)"
+                      value={d.comment}
+                      onChange={(e) => setDraft(issue.key, { comment: e.target.value })}
+                    />
+                  </div>
+                </Card>
               );
             })}
           </div>
 
           <div className="flex items-center justify-end gap-3">
-            <span className="text-base-content/60 text-sm">
+            <span className="text-sm text-gray-600">
               จะลงเวลารวม {formatDuration(draftSeconds)}
             </span>
-            <button
-              className="btn btn-primary gap-1"
-              onClick={onSubmitAll}
-              disabled={submitting || draftSeconds === 0}
-            >
-              {submitting && <span className="loading loading-spinner loading-xs" />}
+            <Button onClick={onSubmitAll} loading={submitting} disabled={draftSeconds === 0}>
               ลงเวลาทั้งหมด
-            </button>
+            </Button>
           </div>
         </>
       )}
@@ -161,26 +158,24 @@ function ProgressCard({ logged, projected }: { logged: number; projected: number
   const pct = Math.min(100, Math.round((projected / WORKDAY_SECONDS) * 100));
   const remaining = Math.max(0, WORKDAY_SECONDS - projected);
   return (
-    <div className="card bg-base-100 border-base-300 border shadow-sm">
-      <div className="card-body gap-2 p-4">
-        <div className="flex items-end justify-between text-sm">
-          <span>
-            ลงแล้ววันนี้ <b>{formatDuration(logged)}</b>
-            {projected > logged && (
-              <span className="text-secondary"> (+{formatDuration(projected - logged)} ที่ร่าง)</span>
-            )}
-          </span>
-          <span className="text-base-content/60">เป้าหมาย 8h</span>
-        </div>
-        <progress
-          className={`progress w-full ${projected >= WORKDAY_SECONDS ? "progress-success" : "progress-warning"}`}
-          value={projected}
-          max={WORKDAY_SECONDS}
-        />
-        <div className="text-base-content/60 text-xs">
-          {remaining === 0 ? "ครบ 8 ชั่วโมงแล้ว ✓" : `เหลืออีก ${formatDuration(remaining)} · ${pct}%`}
-        </div>
+    <Card className="space-y-2">
+      <div className="flex items-end justify-between text-sm">
+        <span className="text-gray-700">
+          ลงแล้ววันนี้ <b className="text-gray-900">{formatDuration(logged)}</b>
+          {projected > logged && (
+            <span className="text-brand-600"> (+{formatDuration(projected - logged)} ที่ร่าง)</span>
+          )}
+        </span>
+        <span className="text-gray-500">เป้าหมาย 8h</span>
       </div>
-    </div>
+      <ProgressBar
+        value={projected}
+        max={WORKDAY_SECONDS}
+        color={projected >= WORKDAY_SECONDS ? "success" : "warning"}
+      />
+      <div className="text-xs text-gray-500">
+        {remaining === 0 ? "ครบ 8 ชั่วโมงแล้ว ✓" : `เหลืออีก ${formatDuration(remaining)} · ${pct}%`}
+      </div>
+    </Card>
   );
 }

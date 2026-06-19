@@ -1,115 +1,111 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
-@plugin "daisyui" {
-  themes: false; /* only register our custom themes below */
+/*
+ * Untitled UI design tokens (light theme).
+ * Color scales, radii and shadows follow the Untitled UI system so utilities
+ * like `bg-brand-600`, `text-gray-700`, `border-gray-200`, `shadow-xs` exist.
+ */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Gray (Untitled UI – light mode) */
+  --color-gray-25: #fcfcfd;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f2f4f7;
+  --color-gray-200: #eaecf0;
+  --color-gray-300: #d0d5dd;
+  --color-gray-400: #98a2b3;
+  --color-gray-500: #667085;
+  --color-gray-600: #475467;
+  --color-gray-700: #344054;
+  --color-gray-800: #1d2939;
+  --color-gray-900: #101828;
+  --color-gray-950: #0c111d;
+
+  /* Brand (Untitled UI primary – purple) */
+  --color-brand-25: #fcfaff;
+  --color-brand-50: #f9f5ff;
+  --color-brand-100: #f4ebff;
+  --color-brand-200: #e9d7fe;
+  --color-brand-300: #d6bbfb;
+  --color-brand-400: #b692f6;
+  --color-brand-500: #9e77ed;
+  --color-brand-600: #7f56d9;
+  --color-brand-700: #6941c6;
+  --color-brand-800: #53389e;
+  --color-brand-900: #42307d;
+
+  /* Error */
+  --color-error-25: #fffbfa;
+  --color-error-50: #fef3f2;
+  --color-error-100: #fee4e2;
+  --color-error-200: #fecdca;
+  --color-error-300: #fda29b;
+  --color-error-400: #f97066;
+  --color-error-500: #f04438;
+  --color-error-600: #d92d20;
+  --color-error-700: #b42318;
+
+  /* Warning */
+  --color-warning-25: #fffcf5;
+  --color-warning-50: #fffaeb;
+  --color-warning-100: #fef0c7;
+  --color-warning-200: #fedf89;
+  --color-warning-300: #fec84b;
+  --color-warning-400: #fdb022;
+  --color-warning-500: #f79009;
+  --color-warning-600: #dc6803;
+  --color-warning-700: #b54708;
+
+  /* Success */
+  --color-success-25: #f6fef9;
+  --color-success-50: #ecfdf3;
+  --color-success-100: #dcfae6;
+  --color-success-200: #abefc6;
+  --color-success-300: #75e0a7;
+  --color-success-400: #47cd89;
+  --color-success-500: #17b26a;
+  --color-success-600: #079455;
+  --color-success-700: #067647;
+
+  /* Blue (secondary accent for charts/badges) */
+  --color-blue-50: #eff8ff;
+  --color-blue-100: #d1e9ff;
+  --color-blue-200: #b2ddff;
+  --color-blue-400: #53b1fd;
+  --color-blue-500: #2e90fa;
+  --color-blue-600: #1570ef;
+  --color-blue-700: #175cd3;
+
+  /* Radii */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+
+  /* Shadows (Untitled UI) */
+  --shadow-xs: 0 1px 2px 0 rgb(16 24 40 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(16 24 40 / 0.1), 0 1px 2px -1px rgb(16 24 40 / 0.06);
+  --shadow-md: 0 4px 8px -2px rgb(16 24 40 / 0.1), 0 2px 4px -2px rgb(16 24 40 / 0.06);
+  --shadow-lg: 0 12px 16px -4px rgb(16 24 40 / 0.08), 0 4px 6px -2px rgb(16 24 40 / 0.03);
+  --shadow-xl: 0 20px 24px -4px rgb(16 24 40 / 0.08), 0 8px 8px -4px rgb(16 24 40 / 0.03);
 }
 
-/* ─── Jari — pastel light (default) ──────────────────────────────────────── */
-@plugin "daisyui/theme" {
-  name: "jari";
-  default: true;
-  prefersdark: false;
-  color-scheme: light;
-
-  /* neutral canvas with a faint cool tint — not stark white */
-  --color-base-100: oklch(99% 0.004 286);
-  --color-base-200: oklch(97% 0.006 286);
-  --color-base-300: oklch(93.5% 0.009 286);
-  --color-base-content: oklch(37% 0.03 279); /* deep slate, never pure black */
-
-  /* primary: soft modern violet, light text for crisp CTAs */
-  --color-primary: oklch(66% 0.15 285);
-  --color-primary-content: oklch(98% 0.01 285);
-
-  /* secondary: pastel rose */
-  --color-secondary: oklch(72% 0.12 350);
-  --color-secondary-content: oklch(99% 0.01 350);
-
-  /* accent: pastel mint */
-  --color-accent: oklch(78% 0.11 185);
-  --color-accent-content: oklch(33% 0.05 195);
-
-  --color-neutral: oklch(45% 0.03 282);
-  --color-neutral-content: oklch(97% 0.01 282);
-
-  /* status colors: soft pastels with dark same-hue text (no harsh fills) */
-  --color-info: oklch(84% 0.07 235);
-  --color-info-content: oklch(37% 0.07 245);
-  --color-success: oklch(84% 0.10 158);
-  --color-success-content: oklch(35% 0.07 158);
-  --color-warning: oklch(89% 0.08 88);
-  --color-warning-content: oklch(42% 0.06 72);
-  --color-error: oklch(80% 0.10 22);
-  --color-error-content: oklch(37% 0.10 22);
-
-  /* generous, modern rounding + soft depth */
-  --radius-selector: 1rem;
-  --radius-field: 0.75rem;
-  --radius-box: 1.5rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 0;
-}
-
-/* ─── Jari — pastel dark ──────────────────────────────────────────────────── */
-@plugin "daisyui/theme" {
-  name: "jarinight";
-  default: false;
-  prefersdark: true;
-  color-scheme: dark;
-
-  --color-base-100: oklch(25% 0.02 282);
-  --color-base-200: oklch(22% 0.02 282);
-  --color-base-300: oklch(30% 0.025 282);
-  --color-base-content: oklch(92% 0.02 286);
-
-  --color-primary: oklch(72% 0.14 285);
-  --color-primary-content: oklch(21% 0.04 285);
-  --color-secondary: oklch(74% 0.11 350);
-  --color-secondary-content: oklch(21% 0.04 350);
-  --color-accent: oklch(78% 0.10 185);
-  --color-accent-content: oklch(22% 0.04 195);
-
-  --color-neutral: oklch(36% 0.02 282);
-  --color-neutral-content: oklch(92% 0.02 282);
-
-  --color-info: oklch(72% 0.09 235);
-  --color-info-content: oklch(20% 0.04 245);
-  --color-success: oklch(76% 0.11 158);
-  --color-success-content: oklch(20% 0.05 158);
-  --color-warning: oklch(82% 0.10 88);
-  --color-warning-content: oklch(24% 0.06 72);
-  --color-error: oklch(72% 0.12 22);
-  --color-error-content: oklch(20% 0.06 22);
-
-  --radius-selector: 1rem;
-  --radius-field: 0.75rem;
-  --radius-box: 1.5rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 0;
-}
-
-html,
-body {
-  height: 100%;
-}
-
-/* subtle ambient background so cards read as elevated */
-body {
-  background-image: radial-gradient(
-      120% 120% at 100% 0%,
-      color-mix(in oklch, var(--color-primary) 7%, transparent),
-      transparent 45%
-    ),
-    radial-gradient(
-      120% 120% at 0% 100%,
-      color-mix(in oklch, var(--color-secondary) 7%, transparent),
-      transparent 45%
-    );
-  min-height: 100vh;
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+  body {
+    background-color: var(--color-gray-50);
+    color: var(--color-gray-900);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Untitled UI focus ring */
+  *:focus-visible {
+    outline: 2px solid var(--color-brand-300);
+    outline-offset: 2px;
+  }
 }

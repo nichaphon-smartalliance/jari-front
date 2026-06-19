@@ -3,14 +3,22 @@
 import { useState } from "react";
 import { CalendarClock } from "lucide-react";
 import { PageHeader, LoadingBlock, ErrorBlock } from "@/components/common";
+import { Badge, type BadgeColor } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Field";
+import { ProgressBar, type ProgressColor } from "@/components/ui/Feedback";
+import { Avatar } from "@/components/ui/Avatar";
 import { useDailyData } from "@/hooks/jari";
 import { formatDuration, todayISO } from "@/lib/format";
 import type { DailyPerson } from "@/types/app/jira";
 
-const STATUS_META: Record<DailyPerson["status"], { cls: string; label: string }> = {
-  under: { cls: "badge-error", label: "ยังไม่ครบ" },
-  ok: { cls: "badge-success", label: "ครบ 8 ชม." },
-  over: { cls: "badge-warning", label: "เกินเวลา" },
+const STATUS_META: Record<
+  DailyPerson["status"],
+  { color: BadgeColor; bar: ProgressColor; label: string }
+> = {
+  under: { color: "error", bar: "error", label: "ยังไม่ครบ" },
+  ok: { color: "success", bar: "success", label: "ครบ 8 ชม." },
+  over: { color: "warning", bar: "warning", label: "เกินเวลา" },
 };
 
 export default function DailyContent() {
@@ -22,11 +30,11 @@ export default function DailyContent() {
       <PageHeader
         title="สรุปเวลาทำงานรายวัน"
         subtitle="ใครยังลงเวลาไม่ครบ 8 ชม. หรือเกิน และทำงานอะไรบ้าง"
-        icon={<CalendarClock size={26} />}
+        icon={<CalendarClock size={22} />}
         actions={
-          <input
+          <Input
             type="date"
-            className="input input-bordered input-sm"
+            className="!w-auto"
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
@@ -40,10 +48,15 @@ export default function DailyContent() {
       ) : (
         <>
           <Summary people={data.people} />
-          <div className="grid gap-3 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2">
             {data.people.map((p) => (
               <PersonCard key={p.accountId} person={p} />
             ))}
+            {data.people.length === 0 && (
+              <Card className="text-center text-sm text-gray-500 lg:col-span-2">
+                ยังไม่มีใครลงเวลาในวันนี้
+              </Card>
+            )}
           </div>
         </>
       )}
@@ -52,25 +65,18 @@ export default function DailyContent() {
 }
 
 function Summary({ people }: { people: DailyPerson[] }) {
-  const counts = {
-    under: people.filter((p) => p.status === "under").length,
-    ok: people.filter((p) => p.status === "ok").length,
-    over: people.filter((p) => p.status === "over").length,
-  };
   const items = [
-    { label: "ยังไม่ครบ", value: counts.under, cls: "text-error" },
-    { label: "ครบพอดี", value: counts.ok, cls: "text-success" },
-    { label: "เกินเวลา", value: counts.over, cls: "text-warning" },
+    { label: "ยังไม่ครบ", value: people.filter((p) => p.status === "under").length, cls: "text-error-600" },
+    { label: "ครบพอดี", value: people.filter((p) => p.status === "ok").length, cls: "text-success-600" },
+    { label: "เกินเวลา", value: people.filter((p) => p.status === "over").length, cls: "text-warning-600" },
   ];
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-4">
       {items.map((it) => (
-        <div key={it.label} className="card bg-base-100 border-base-300 border shadow-sm">
-          <div className="card-body items-center p-4">
-            <div className={`text-3xl font-bold ${it.cls}`}>{it.value}</div>
-            <div className="text-base-content/60 text-xs">{it.label}</div>
-          </div>
-        </div>
+        <Card key={it.label} className="flex flex-col items-center">
+          <div className={`text-3xl font-semibold ${it.cls}`}>{it.value}</div>
+          <div className="mt-1 text-xs text-gray-500">{it.label}</div>
+        </Card>
       ))}
     </div>
   );
@@ -79,43 +85,38 @@ function Summary({ people }: { people: DailyPerson[] }) {
 function PersonCard({ person }: { person: DailyPerson }) {
   const meta = STATUS_META[person.status];
   return (
-    <div className="card bg-base-100 border-base-300 border shadow-sm">
-      <div className="card-body gap-3 p-4">
-        <div className="flex items-center justify-between">
-          <span className="font-semibold">{person.displayName}</span>
-          <span className={`badge ${meta.cls} badge-sm`}>{meta.label}</span>
+    <Card className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <Avatar name={person.displayName} size={36} />
+          <span className="font-semibold text-gray-900">{person.displayName}</span>
         </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold">{formatDuration(person.totalSeconds)}</span>
-          <span className="text-base-content/50 text-sm">/ 8h</span>
-        </div>
-        <progress
-          className={`progress w-full ${
-            person.status === "under"
-              ? "progress-error"
-              : person.status === "over"
-                ? "progress-warning"
-                : "progress-success"
-          }`}
-          value={person.totalSeconds}
-          max={person.targetSeconds}
-        />
-        {person.entries.length > 0 ? (
-          <ul className="divide-base-300 divide-y text-sm">
-            {person.entries.map((e) => (
-              <li key={e.issueKey} className="flex items-center justify-between py-1.5">
-                <span className="min-w-0 truncate">
-                  <span className="text-base-content/50 font-mono text-xs">{e.issueKey}</span>{" "}
-                  {e.issueSummary}
-                </span>
-                <span className="text-base-content/70 ml-2 shrink-0">{e.hours}h</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="text-base-content/40 text-sm">ยังไม่ได้ลงเวลาวันนี้</div>
-        )}
+        <Badge color={meta.color} dot>
+          {meta.label}
+        </Badge>
       </div>
-    </div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-2xl font-semibold text-gray-900">
+          {formatDuration(person.totalSeconds)}
+        </span>
+        <span className="text-sm text-gray-400">/ 8h</span>
+      </div>
+      <ProgressBar value={person.totalSeconds} max={person.targetSeconds} color={meta.bar} />
+      {person.entries.length > 0 ? (
+        <ul className="divide-y divide-gray-100 text-sm">
+          {person.entries.map((e) => (
+            <li key={e.issueKey} className="flex items-center justify-between py-1.5">
+              <span className="min-w-0 truncate text-gray-700">
+                <span className="font-mono text-xs text-gray-500">{e.issueKey}</span>{" "}
+                {e.issueSummary}
+              </span>
+              <span className="ml-2 shrink-0 font-medium text-gray-600">{e.hours}h</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="text-sm text-gray-400">ยังไม่ได้ลงเวลาวันนี้</div>
+      )}
+    </Card>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth";
+import { Spinner } from "@/components/ui/Feedback";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -14,8 +15,8 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (loading || !user) {
     return (
-      <div className="grid min-h-screen place-items-center">
-        <span className="loading loading-spinner loading-lg text-primary" />
+      <div className="grid min-h-screen place-items-center bg-gray-50">
+        <Spinner size={32} />
       </div>
     );
   }

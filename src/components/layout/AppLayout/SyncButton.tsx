@@ -4,6 +4,7 @@ import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiPost } from "@/lib/api/client";
+import { Button } from "@/components/ui/Button";
 
 export default function SyncButton() {
   const qc = useQueryClient();
@@ -16,7 +17,7 @@ export default function SyncButton() {
     setError(false);
     try {
       await apiPost("/sync");
-      await qc.invalidateQueries(); // refetch everything (dashboard, issues, users, ...)
+      await qc.invalidateQueries();
       setLastSynced(
         new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }),
       );
@@ -28,12 +29,13 @@ export default function SyncButton() {
   };
 
   return (
-    <button
+    <Button
+      variant={error ? "destructive" : "secondary"}
+      size="sm"
       onClick={sync}
-      disabled={syncing}
-      className={`btn btn-sm gap-1 ${error ? "btn-error" : "btn-primary"}`}
+      loading={syncing}
+      iconLeft={!syncing && <RefreshCw size={16} />}
     >
-      <RefreshCw size={16} className={syncing ? "animate-spin" : ""} />
       <span className="hidden sm:inline">
         {syncing
           ? "กำลัง Sync..."
@@ -43,6 +45,6 @@ export default function SyncButton() {
               ? `Sync ${lastSynced}`
               : "Sync Jira"}
       </span>
-    </button>
+    </Button>
   );
 }

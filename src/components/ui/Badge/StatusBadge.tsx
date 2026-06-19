@@ -1,9 +1,10 @@
 import type { StatusCategory } from "@/types/app/jira";
+import Badge, { type BadgeColor } from "./Badge";
 
-const MAP: Record<StatusCategory, { cls: string; label: string }> = {
-  todo: { cls: "badge-ghost", label: "To Do" },
-  inprogress: { cls: "badge-info", label: "In Progress" },
-  done: { cls: "badge-success", label: "Done" },
+const MAP: Record<StatusCategory, { color: BadgeColor; label: string }> = {
+  todo: { color: "gray", label: "To Do" },
+  inprogress: { color: "blue", label: "In Progress" },
+  done: { color: "success", label: "Done" },
 };
 
 export default function StatusBadge({
@@ -14,5 +15,9 @@ export default function StatusBadge({
   label?: string;
 }) {
   const m = MAP[category];
-  return <span className={`badge ${m.cls} badge-sm`}>{label ?? m.label}</span>;
+  return (
+    <Badge color={m.color} dot>
+      {label ?? m.label}
+    </Badge>
+  );
 }

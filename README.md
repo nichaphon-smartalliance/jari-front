@@ -1,6 +1,11 @@
 # jari-front
 
-Frontend for **Jari** — Bun + Next.js (App Router) + TypeScript + **daisyUI** + lucide-react.
+Frontend for **Jari** — Bun + Next.js (App Router) + TypeScript + **Untitled UI** (Tailwind v4) + lucide-react.
+
+UI primitives live in `src/components/ui` (Button, Badge, Card, Field, Spinner, ProgressBar,
+RadialProgress, Dropdown, Avatar). Design tokens (gray / brand-purple / semantic scales, shadows,
+Inter font) are in `src/app/globals.css` under `@theme`. Use token utilities like `bg-brand-600`,
+`text-gray-700`, `border-gray-200`, `shadow-xs` — never raw Tailwind colors.
 
 > Currently runs on **mock data**. The service layer (`src/services/*.service.ts`) is the only
 > place that reads `src/lib/mock/data.ts`. To go live, swap each service function body for a
@@ -20,13 +25,14 @@ bun run build    # production build
 ```
 page.tsx (thin)  →  partials/<Feature>/<Feature>Content.tsx ("use client")
                  →  hooks/jari/use*.ts  (React Query: useQuery / useMutation)
-                 →  services/*.service.ts  (domain logic, returns app types)
-                 →  lib/mock/data.ts  (TEMP — replace with jari-back fetch)
-types/app/jira   ·  components/ui (daisyUI badges) · components/common · components/layout
+                 →  services/*.service.ts  (calls jari-back via lib/api/client.ts)
+                 →  jari-back (Hono :4000)
+types/app/jira   ·  components/ui (Untitled UI primitives) · components/common · components/layout
+context/auth     ·  login + AuthGuard; identity (accountId) shared via useAuth
 ```
 
-All imports use the `@/*` alias. daisyUI **theme tokens** only (`base-100`, `primary`, `success`,
-`warning`, `error`, …) — no raw Tailwind colors. Theme switcher persists to `localStorage`.
+All imports use the `@/*` alias. Untitled UI **token utilities** only (`bg-brand-600`,
+`text-gray-700`, `border-gray-200`, `shadow-xs`, …) — no raw Tailwind colors.
 
 ## Pages → features (see ../docs/01-product.md)
 

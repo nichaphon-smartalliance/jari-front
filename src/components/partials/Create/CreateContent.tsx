@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { Plus, PlusSquare, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { PageHeader } from "@/components/common";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input, Label, Select, Textarea } from "@/components/ui/Field";
 import {
   useCreateStory,
   useProjects,
@@ -21,7 +24,7 @@ export default function CreateContent() {
   const rewrite = useRewriteText();
   const suggest = useSuggestSubtasks();
 
-  const [projectKey, setProjectKey] = useState("MTG");
+  const [projectKey, setProjectKey] = useState("");
   const [assignee, setAssignee] = useState("");
   const [priority, setPriority] = useState<Priority>("Medium");
   const [summary, setSummary] = useState("");
@@ -50,7 +53,7 @@ export default function CreateContent() {
 
   const onSubmit = async () => {
     const res = await createStory.mutateAsync({
-      projectKey,
+      projectKey: projectKey || projects?.[0]?.key || "",
       summary,
       description,
       priority,
@@ -65,136 +68,123 @@ export default function CreateContent() {
       <PageHeader
         title="สร้าง Story & Sub-task"
         subtitle="สร้างงานเร็วกว่า Jira พร้อมผู้ช่วย AI"
-        icon={<PlusSquare size={26} />}
+        icon={<PlusSquare size={22} />}
       />
 
       {result && (
-        <div className="alert alert-success">
-          <Sparkles size={18} />
-          <span>
+        <div className="flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-700">
+          <Sparkles size={18} className="shrink-0" />
+          <span className="flex-1">
             สร้างสำเร็จ! Story <b>{result.storyKey}</b>
-            {result.subtaskKeys.length > 0 && (
-              <> พร้อม Sub-task {result.subtaskKeys.join(", ")}</>
-            )}
+            {result.subtaskKeys.length > 0 && <> · Sub-task {result.subtaskKeys.join(", ")}</>}
           </span>
-          <button className="btn btn-sm" onClick={() => setResult(null)}>
+          <Button variant="secondary" size="sm" onClick={() => setResult(null)}>
             สร้างใหม่
-          </button>
+          </Button>
         </div>
       )}
 
-      <div className="card bg-base-100 border-base-300 border shadow-sm">
-        <div className="card-body gap-4">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Field label="โปรเจค">
-              <select
-                className="select select-bordered w-full"
-                value={projectKey}
-                onChange={(e) => setProjectKey(e.target.value)}
-              >
-                {projects?.map((p) => (
-                  <option key={p.key} value={p.key}>
-                    {p.name} ({p.key})
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="ผู้รับผิดชอบ">
-              <select
-                className="select select-bordered w-full"
-                value={assignee}
-                onChange={(e) => setAssignee(e.target.value)}
-              >
-                <option value="">— ไม่ระบุ —</option>
-                {users?.map((u) => (
-                  <option key={u.accountId} value={u.accountId}>
-                    {u.displayName}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="ความสำคัญ">
-              <select
-                className="select select-bordered w-full"
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as Priority)}
-              >
-                {PRIORITIES.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </div>
-
-          <Field label="หัวข้อ Story" action={
-            <AiButton loading={rewrite.isPending} onClick={onRewriteTitle} label="AI ปรับคำ" />
-          }>
-            <input
-              className="input input-bordered w-full"
-              placeholder="เช่น พัฒนาหน้า login ใหม่"
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-            />
-          </Field>
-
-          <Field label="รายละเอียด" action={
-            <AiButton loading={rewrite.isPending} onClick={onRewriteDesc} label="AI ช่วยเขียน" />
-          }>
-            <textarea
-              className="textarea textarea-bordered min-h-28 w-full"
-              placeholder="อธิบายงานคร่าว ๆ แล้วให้ AI ขยายความให้"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </Field>
-
+      <Card className="space-y-5">
+        <div className="grid gap-4 sm:grid-cols-3">
           <div>
-            <div className="mb-1 flex items-center justify-between">
-              <label className="label-text font-medium">Sub-tasks</label>
-              <AiButton loading={suggest.isPending} onClick={onSuggest} label="AI แนะนำ Sub-task" />
-            </div>
-            <div className="space-y-2">
-              {subtasks.map((st, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <input
-                    className="input input-bordered input-sm w-full"
-                    placeholder={`Sub-task ${i + 1}`}
-                    value={st}
-                    onChange={(e) => setSubtask(i, e.target.value)}
-                  />
-                  <button
-                    className="btn btn-ghost btn-sm btn-square text-error"
-                    onClick={() => removeSubtask(i)}
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
+            <Label>โปรเจค</Label>
+            <Select value={projectKey} onChange={(e) => setProjectKey(e.target.value)}>
+              <option value="">— เลือกโปรเจค —</option>
+              {projects?.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.name} ({p.key})
+                </option>
               ))}
-              <button className="btn btn-ghost btn-sm gap-1" onClick={addSubtask}>
-                <Plus size={15} /> เพิ่ม Sub-task
-              </button>
-            </div>
+            </Select>
           </div>
-
-          <div className="card-actions justify-end pt-2">
-            <button
-              className="btn btn-primary gap-1"
-              disabled={!summary.trim() || createStory.isPending}
-              onClick={onSubmit}
-            >
-              {createStory.isPending && <span className="loading loading-spinner loading-xs" />}
-              สร้างงาน
-            </button>
+          <div>
+            <Label>ผู้รับผิดชอบ</Label>
+            <Select value={assignee} onChange={(e) => setAssignee(e.target.value)}>
+              <option value="">— ไม่ระบุ —</option>
+              {users?.map((u) => (
+                <option key={u.accountId} value={u.accountId}>
+                  {u.displayName}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label>ความสำคัญ</Label>
+            <Select value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
+              {PRIORITIES.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </Select>
           </div>
         </div>
-      </div>
+
+        <FieldRow
+          label="หัวข้อ Story"
+          action={<AiButton loading={rewrite.isPending} onClick={onRewriteTitle} label="AI ปรับคำ" />}
+        >
+          <Input
+            placeholder="เช่น พัฒนาหน้า login ใหม่"
+            value={summary}
+            onChange={(e) => setSummary(e.target.value)}
+          />
+        </FieldRow>
+
+        <FieldRow
+          label="รายละเอียด"
+          action={<AiButton loading={rewrite.isPending} onClick={onRewriteDesc} label="AI ช่วยเขียน" />}
+        >
+          <Textarea
+            className="min-h-28"
+            placeholder="อธิบายงานคร่าว ๆ แล้วให้ AI ขยายความให้"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </FieldRow>
+
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <Label>Sub-tasks</Label>
+            <AiButton loading={suggest.isPending} onClick={onSuggest} label="AI แนะนำ Sub-task" />
+          </div>
+          <div className="space-y-2">
+            {subtasks.map((st, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Input
+                  placeholder={`Sub-task ${i + 1}`}
+                  value={st}
+                  onChange={(e) => setSubtask(i, e.target.value)}
+                />
+                <button
+                  onClick={() => removeSubtask(i)}
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-error-50 hover:text-error-600"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+            <Button variant="tertiary" size="sm" onClick={addSubtask} iconLeft={<Plus size={15} />}>
+              เพิ่ม Sub-task
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex justify-end border-t border-gray-100 pt-4">
+          <Button
+            onClick={onSubmit}
+            loading={createStory.isPending}
+            disabled={!summary.trim() || (!projectKey && !projects?.length)}
+          >
+            สร้างงาน
+          </Button>
+        </div>
+      </Card>
     </div>
   );
 }
 
-function Field({
+function FieldRow({
   label,
   action,
   children,
@@ -205,8 +195,8 @@ function Field({
 }) {
   return (
     <div>
-      <div className="mb-1 flex items-center justify-between">
-        <label className="label-text font-medium">{label}</label>
+      <div className="mb-1.5 flex items-center justify-between">
+        <Label>{label}</Label>
         {action}
       </div>
       {children}
@@ -224,8 +214,16 @@ function AiButton({
   label: string;
 }) {
   return (
-    <button className="btn btn-ghost btn-xs text-primary gap-1" onClick={onClick} disabled={loading}>
-      {loading ? <span className="loading loading-spinner loading-xs" /> : <Wand2 size={13} />}
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-60"
+    >
+      {loading ? (
+        <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+      ) : (
+        <Wand2 size={13} />
+      )}
       {label}
     </button>
   );
