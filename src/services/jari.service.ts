@@ -65,6 +65,27 @@ export async function createWorklog(input: {
 export const getDailyData = (date: string) =>
   apiGet<DailyData>(`/daily?date=${encodeURIComponent(date)}`);
 
+// ─── Jira account linking (Settings) ─────────────────────────────────────────
+
+export interface JiraAccountStatus {
+  username: string;
+  displayName: string;
+  jiraEmail: string;
+  accountId: string;
+  hasToken: boolean;
+}
+
+export const getJiraAccount = () => apiGet<JiraAccountStatus>("/auth/jira-account");
+
+export interface UpdateJiraAccountResult {
+  token: string;
+  user: { username: string; accountId: string; displayName: string };
+  jiraEmail: string;
+}
+
+export const updateJiraAccount = (input: { email: string; token: string }) =>
+  apiPost<UpdateJiraAccountResult>("/auth/jira-account", input);
+
 // ─── Create story + subtasks (#2) ────────────────────────────────────────────
 
 export async function createStory(

@@ -1,12 +1,14 @@
 "use client";
 
-import { ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogOut, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth";
 import { Dropdown, DropdownItem } from "@/components/ui/Dropdown";
 import { Avatar } from "@/components/ui/Avatar";
 
 export default function UserMenu() {
   const { user, logout } = useAuth();
+  const router = useRouter();
   if (!user) return null;
 
   return (
@@ -37,6 +39,14 @@ export default function UserMenu() {
             </div>
           </div>
           <div className="pt-1">
+            <DropdownItem
+              onClick={() => {
+                close();
+                router.push("/settings");
+              }}
+            >
+              <Settings size={15} /> ตั้งค่าบัญชี Jira
+            </DropdownItem>
             <DropdownItem
               danger
               onClick={() => {

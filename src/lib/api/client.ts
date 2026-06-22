@@ -40,3 +40,20 @@ export const apiGet = <T>(path: string) => api<T>(path);
 
 export const apiPost = <T>(path: string, body?: unknown) =>
   api<T>(path, { method: "POST", body: body !== undefined ? JSON.stringify(body) : undefined });
+
+/** Pull the backend's `{ error }` message out of a thrown api() Error (which
+ *  embeds the response JSON), falling back to a generic message. */
+export function apiErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof Error) {
+    const match = err.message.match(/\{.*\}$/);
+    if (match) {
+      try {
+        const body = JSON.parse(match[0]) as { error?: string };
+        if (body.error) return body.error;
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+  return fallback;
+}

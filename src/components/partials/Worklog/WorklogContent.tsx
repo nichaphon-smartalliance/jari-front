@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, Sparkles, Timer } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle2, Settings, Sparkles, Timer } from "lucide-react";
 import { PageHeader, LoadingBlock, ErrorBlock, EmptyBlock } from "@/components/common";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -14,6 +15,7 @@ import {
   useWorklogCandidates,
 } from "@/hooks/jari";
 import { useAuth } from "@/context/auth";
+import { apiErrorMessage } from "@/lib/api/client";
 import { WORKDAY_SECONDS, formatDuration, parseDuration, todayISO } from "@/lib/format";
 
 interface Draft {
@@ -32,6 +34,7 @@ export default function WorklogContent() {
 
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const loggedSeconds = useMemo(() => {
     const me = daily?.people.find((p) => p.accountId === accountId);
@@ -63,6 +66,7 @@ export default function WorklogContent() {
 
   const onSubmitAll = async () => {
     setSubmitting(true);
+    setSubmitError("");
     try {
       for (const issue of list) {
         const d = drafts[issue.key];
@@ -77,6 +81,8 @@ export default function WorklogContent() {
         }
       }
       setDrafts({});
+    } catch (err) {
+      setSubmitError(apiErrorMessage(err, "ลงเวลาไม่สำเร็จ ลองอีกครั้ง"));
     } finally {
       setSubmitting(false);
     }
@@ -139,6 +145,18 @@ export default function WorklogContent() {
               );
             })}
           </div>
+
+          {submitError && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700">
+              <span>{submitError}</span>
+              <Link
+                href="/settings"
+                className="inline-flex items-center gap-1.5 font-semibold text-error-700 hover:underline"
+              >
+                <Settings size={15} /> ไปที่ตั้งค่าบัญชี
+              </Link>
+            </div>
+          )}
 
           <div className="flex items-center justify-end gap-3">
             <span className="text-sm text-gray-600">

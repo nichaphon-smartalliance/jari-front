@@ -14,6 +14,8 @@ interface AuthContextValue {
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  /** Replace the stored token + user (e.g. after linking a Jira account). */
+  updateSession: (token: string, user: AuthUser) => void;
 }
 
 const USER_STORAGE_KEY = "jari-user";
@@ -53,8 +55,14 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     setUser(null);
   }, []);
 
+  const updateSession = useCallback((token: string, nextUser: AuthUser) => {
+    localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(nextUser));
+    setUser(nextUser);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateSession }}>
       {children}
     </AuthContext.Provider>
   );
