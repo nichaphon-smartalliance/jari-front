@@ -51,3 +51,40 @@ export async function planWorklogs(
     comment: p.comment,
   }));
 }
+
+/** #6 — AI spreads the whole Done-sub-task backlog across past workdays (8h/day,
+ *  skipping weekends), backward from `startDate`. Each item carries its date. */
+export interface BackfillPlanItem {
+  issueKey: string;
+  issueSummary: string;
+  date: string; // YYYY-MM-DD
+  seconds: number;
+  timeSpent: string;
+  comment: string;
+}
+
+export async function backfillWorklogs(
+  candidates: Issue[],
+  accountId: string,
+  startDate: string,
+): Promise<BackfillPlanItem[]> {
+  if (candidates.length === 0) return [];
+  const { plan } = await apiPost<{
+    plan: { issueKey: string; date: string; timeSpentSeconds: number; comment: string }[];
+  }>("/ai/backfill-worklogs", {
+    candidates: candidates.map((c) => ({ issueKey: c.key, summary: c.summary })),
+    accountId,
+    startDate,
+    skipWeekends: true,
+  });
+
+  const byKey = new Map(candidates.map((c) => [c.key, c]));
+  return plan.map((p) => ({
+    issueKey: p.issueKey,
+    issueSummary: byKey.get(p.issueKey)?.summary ?? p.issueKey,
+    date: p.date,
+    seconds: p.timeSpentSeconds,
+    timeSpent: formatDuration(p.timeSpentSeconds),
+    comment: p.comment,
+  }));
+}

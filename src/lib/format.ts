@@ -24,3 +24,12 @@ export function hoursToSeconds(hours: number): number {
 }
 
 export const todayISO = () => new Date().toISOString().slice(0, 10);
+
+/** Local calendar date as YYYY-MM-DD (not UTC) — correct for date pickers so the
+ *  user sees their own "today" regardless of timezone offset. */
+export function localDateISO(d = new Date()): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
