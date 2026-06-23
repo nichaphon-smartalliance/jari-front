@@ -146,25 +146,28 @@ export default function WorklogContent() {
             })}
           </div>
 
-          {submitError && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700">
-              <span>{submitError}</span>
-              <Link
-                href="/settings"
-                className="inline-flex items-center gap-1.5 font-semibold text-error-700 hover:underline"
-              >
-                <Settings size={15} /> ไปที่ตั้งค่าบัญชี
-              </Link>
+          {/* Floating action bar — stays reachable at the bottom of the screen
+              even when the candidate list is long, so you don't scroll to submit. */}
+          <div className="sticky bottom-4 z-20 space-y-2">
+            {submitError && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-error-200 bg-error-50/95 px-4 py-3 text-sm text-error-700 shadow-lg backdrop-blur">
+                <span>{submitError}</span>
+                <Link
+                  href="/settings"
+                  className="inline-flex items-center gap-1.5 font-semibold text-error-700 hover:underline"
+                >
+                  <Settings size={15} /> ไปที่ตั้งค่าบัญชี
+                </Link>
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
+              <span className="text-sm text-gray-600">
+                จะลงเวลารวม <b className="text-gray-900">{formatDuration(draftSeconds)}</b>
+              </span>
+              <Button onClick={onSubmitAll} loading={submitting} disabled={draftSeconds === 0}>
+                ลงเวลาทั้งหมด
+              </Button>
             </div>
-          )}
-
-          <div className="flex items-center justify-end gap-3">
-            <span className="text-sm text-gray-600">
-              จะลงเวลารวม {formatDuration(draftSeconds)}
-            </span>
-            <Button onClick={onSubmitAll} loading={submitting} disabled={draftSeconds === 0}>
-              ลงเวลาทั้งหมด
-            </Button>
           </div>
         </>
       )}
