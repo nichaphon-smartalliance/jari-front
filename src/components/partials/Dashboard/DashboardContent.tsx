@@ -10,10 +10,12 @@ import {
 } from "lucide-react";
 import { PageHeader, LoadingBlock, ErrorBlock } from "@/components/common";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { ProgressBar, RadialProgress } from "@/components/ui/Feedback";
 import { useDashboard } from "@/hooks/jari";
 import type { DashboardData } from "@/types/app/jira";
+import SprintWorkloadCard from "./SprintWorkloadCard";
+import TimelineCard from "./TimelineCard";
+import ProjectStatusCard from "./ProjectStatusCard";
 
 export default function DashboardContent() {
   const { data, isLoading, isError } = useDashboard();
@@ -33,10 +35,9 @@ export default function DashboardContent() {
         <TrendCard data={data} />
         <RatesCard data={data} />
       </div>
-      <div className="grid gap-5 lg:grid-cols-2">
-        <WorkloadCard data={data} />
-        <ProjectsCard data={data} />
-      </div>
+      <SprintWorkloadCard />
+      <TimelineCard />
+      <ProjectStatusCard />
       <SprintCard data={data} />
     </div>
   );
@@ -149,76 +150,3 @@ function SprintCard({ data }: { data: DashboardData }) {
   );
 }
 
-function WorkloadCard({ data }: { data: DashboardData }) {
-  return (
-    <Card padded={false}>
-      <h2 className="border-b border-gray-200 p-5 text-sm font-semibold text-gray-900">
-        ภาระงานของทีม
-      </h2>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-200 bg-gray-50 text-xs font-medium text-gray-600">
-              <th className="px-5 py-2.5 text-left">สมาชิก</th>
-              <th className="px-3 py-2.5 text-center">To Do</th>
-              <th className="px-3 py-2.5 text-center">ทำอยู่</th>
-              <th className="px-3 py-2.5 text-center">เสร็จ</th>
-              <th className="px-5 py-2.5 text-right">วันนี้</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {data.workload.slice(0, 10).map((w) => (
-              <tr key={w.accountId} className="hover:bg-gray-50">
-                <td className="px-5 py-2.5 font-medium text-gray-900">{w.displayName}</td>
-                <td className="px-3 py-2.5 text-center text-gray-600">{w.todo}</td>
-                <td className="px-3 py-2.5 text-center text-gray-600">{w.inProgress}</td>
-                <td className="px-3 py-2.5 text-center text-gray-600">{w.done}</td>
-                <td className="px-5 py-2.5 text-right">
-                  <Badge
-                    color={
-                      w.loggedHoursToday >= 8
-                        ? "success"
-                        : w.loggedHoursToday === 0
-                          ? "gray"
-                          : "warning"
-                    }
-                  >
-                    {w.loggedHoursToday}h
-                  </Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
-  );
-}
-
-function ProjectsCard({ data }: { data: DashboardData }) {
-  return (
-    <Card>
-      <h2 className="text-sm font-semibold text-gray-900">สุขภาพแต่ละโปรเจค</h2>
-      <div className="mt-4 space-y-4">
-        {data.projects.slice(0, 6).map((p) => (
-          <div key={p.projectKey}>
-            <div className="mb-1.5 flex items-center justify-between text-sm">
-              <span className="font-medium text-gray-900">
-                {p.projectName} <span className="text-gray-400">({p.projectKey})</span>
-              </span>
-              <Badge
-                color={p.healthScore >= 70 ? "success" : p.healthScore >= 40 ? "warning" : "error"}
-              >
-                {p.healthScore}
-              </Badge>
-            </div>
-            <ProgressBar value={p.done} max={p.total} color="brand" />
-            <div className="mt-1 text-xs text-gray-500">
-              เสร็จ {p.done}/{p.total} · เกินกำหนด {p.overdue}
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-}

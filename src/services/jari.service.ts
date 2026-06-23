@@ -60,6 +60,44 @@ export async function createWorklog(input: {
   });
 }
 
+// ─── Dashboard reports (#1 workload · #2 timeline · #3 project status) ────────
+
+export interface SprintWorkloadPerson {
+  accountId: string;
+  displayName: string;
+  waiting: number;
+  done: number;
+  total: number;
+}
+
+export async function getSprintWorkload(): Promise<SprintWorkloadPerson[]> {
+  const { people } = await apiGet<{ people: SprintWorkloadPerson[] }>("/reports/workload");
+  return people;
+}
+
+export interface SprintTimeline {
+  days: string[];
+  people: { accountId: string; displayName: string; daily: number[] }[];
+}
+
+export const getSprintTimeline = () => apiGet<SprintTimeline>("/reports/timeline");
+
+export interface ProjectStatus {
+  projectKey: string;
+  projectName: string;
+  totalStories: number;
+  storyStatuses: {
+    status: string;
+    count: number;
+    subtaskCategories: { category: string; count: number }[];
+  }[];
+}
+
+export async function getProjectStatus(): Promise<ProjectStatus[]> {
+  const { projects } = await apiGet<{ projects: ProjectStatus[] }>("/reports/project-status");
+  return projects;
+}
+
 // ─── Daily 8h view (#5) ──────────────────────────────────────────────────────
 
 export const getDailyData = (date: string) =>
