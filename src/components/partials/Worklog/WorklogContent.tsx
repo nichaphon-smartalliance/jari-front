@@ -58,10 +58,15 @@ export default function WorklogContent() {
     });
 
   const onAiFill = async () => {
-    const items = await plan.mutateAsync({ candidates: list, alreadyLoggedSeconds: loggedSeconds });
-    const next: Record<string, Draft> = {};
-    for (const it of items) next[it.issueKey] = { timeSpent: it.timeSpent, comment: it.comment };
-    setDrafts(next);
+    setSubmitError("");
+    try {
+      const items = await plan.mutateAsync({ candidates: list, alreadyLoggedSeconds: loggedSeconds });
+      const next: Record<string, Draft> = {};
+      for (const it of items) next[it.issueKey] = { timeSpent: it.timeSpent, comment: it.comment };
+      setDrafts(next);
+    } catch (err) {
+      setSubmitError(apiErrorMessage(err, "AI ลงเวลาให้ไม่สำเร็จ ลองอีกครั้ง"));
+    }
   };
 
   const onSubmitAll = async () => {
