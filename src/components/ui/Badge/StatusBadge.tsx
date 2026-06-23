@@ -5,6 +5,8 @@ const MAP: Record<StatusCategory, { color: BadgeColor; label: string }> = {
   todo: { color: "gray", label: "To Do" },
   inprogress: { color: "blue", label: "In Progress" },
   done: { color: "success", label: "Done" },
+  blocked: { color: "error", label: "BLOCKED" },
+  qa: { color: "warning", label: "QA&TEST" },
 };
 
 export default function StatusBadge({
