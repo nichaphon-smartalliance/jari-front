@@ -10,6 +10,7 @@ import type {
   Issue,
   JiraUser,
   Project,
+  StatusCategory,
 } from "@/types/app/jira";
 
 // ─── Reference data (#2) ─────────────────────────────────────────────────────
@@ -24,11 +25,14 @@ export const getDashboard = () => apiGet<DashboardData>("/dashboard");
 
 // ─── My work (#3) ────────────────────────────────────────────────────────────
 
-export async function getMyOpenIssues(accountId: string): Promise<Issue[]> {
+export async function getMyOpenIssues(
+  accountId: string,
+  statusCategories?: StatusCategory[],
+): Promise<Issue[]> {
   if (!accountId) return [];
-  const { issues } = await apiGet<{ issues: Issue[] }>(
-    `/my-issues?accountId=${encodeURIComponent(accountId)}`,
-  );
+  const params = new URLSearchParams({ accountId });
+  if (statusCategories?.length) params.set("status", statusCategories.join(","));
+  const { issues } = await apiGet<{ issues: Issue[] }>(`/my-issues?${params.toString()}`);
   return issues;
 }
 

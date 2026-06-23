@@ -1,7 +1,7 @@
 // Frontend domain types for Jari. Mirrors the data Jari syncs from Jira
 // (Story -> Sub-task -> worklog) but shaped for UI consumption.
 
-export type StatusCategory = "todo" | "inprogress" | "done";
+export type StatusCategory = "todo" | "inprogress" | "done" | "blocked" | "qa";
 export type IssueType = "Story" | "Sub-task";
 export type Priority = "Highest" | "High" | "Medium" | "Low" | "Lowest";
 

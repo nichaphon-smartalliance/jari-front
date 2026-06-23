@@ -2,13 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMyOpenIssues, markIssueDone } from "@/services/jari.service";
+import type { StatusCategory } from "@/types/app/jira";
 
 export const MY_WORK_QUERY_KEY = ["myOpenIssues"] as const;
 
-export const useMyOpenIssues = (accountId: string) =>
+export const useMyOpenIssues = (accountId: string, statusCategories?: StatusCategory[]) =>
   useQuery({
-    queryKey: [...MY_WORK_QUERY_KEY, accountId],
-    queryFn: () => getMyOpenIssues(accountId),
+    queryKey: [...MY_WORK_QUERY_KEY, accountId, statusCategories ?? []],
+    queryFn: () => getMyOpenIssues(accountId, statusCategories),
     enabled: !!accountId,
   });
 

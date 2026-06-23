@@ -1,20 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import { CheckCircle2, ListChecks, PartyPopper } from "lucide-react";
 import { PageHeader, LoadingBlock, ErrorBlock, EmptyBlock } from "@/components/common";
 import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useMarkDone, useMyOpenIssues } from "@/hooks/jari";
 import { useAuth } from "@/context/auth";
-import type { Issue } from "@/types/app/jira";
+import type { Issue, StatusCategory } from "@/types/app/jira";
+
+const STATUS_OPTIONS: { value: StatusCategory; label: string }[] = [
+  { value: "todo", label: "To Do" },
+  { value: "inprogress", label: "In Progress" },
+  { value: "done", label: "Done" },
+  { value: "blocked", label: "BLOCKED" },
+  { value: "qa", label: "QA&TEST" },
+];
 
 export default function WorkContent() {
   const { user } = useAuth();
-  const { data, isLoading, isError } = useMyOpenIssues(user?.accountId ?? "");
+  const [statusFilter, setStatusFilter] = useState<StatusCategory[]>(["todo", "inprogress"]);
+  const { data, isLoading, isError } = useMyOpenIssues(user?.accountId ?? "", statusFilter);
   const markDone = useMarkDone();
 
-  if (isLoading) return <LoadingBlock />;
-  if (isError) return <ErrorBlock />;
+  const toggleStatus = (status: StatusCategory) =>
+    setStatusFilter((prev) =>
+      prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status],
+    );
 
   const issues = data ?? [];
 
@@ -26,7 +38,31 @@ export default function WorkContent() {
         icon={<ListChecks size={22} />}
       />
 
-      {issues.length === 0 ? (
+      <div className="flex flex-wrap gap-2">
+        {STATUS_OPTIONS.map((opt) => {
+          const active = statusFilter.includes(opt.value);
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => toggleStatus(opt.value)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                active
+                  ? "border-brand-600 bg-brand-50 text-brand-700"
+                  : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
+              }`}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {isLoading ? (
+        <LoadingBlock />
+      ) : isError ? (
+        <ErrorBlock />
+      ) : issues.length === 0 ? (
         <EmptyBlock label="เคลียร์งานหมดแล้ว! 🎉" icon={<PartyPopper size={32} />} />
       ) : (
         <div className="divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xs">
