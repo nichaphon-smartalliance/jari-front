@@ -1,7 +1,12 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { planWorklogs, rewriteText, suggestSubtasks } from "@/services/ai.service";
+import {
+  backfillWorklogs,
+  planWorklogs,
+  rewriteText,
+  suggestSubtasks,
+} from "@/services/ai.service";
 import type { Issue } from "@/types/app/jira";
 
 export const useRewriteText = () =>
@@ -25,4 +30,17 @@ export const usePlanWorklogs = () =>
       candidates: Issue[];
       alreadyLoggedSeconds: number;
     }) => planWorklogs(candidates, alreadyLoggedSeconds),
+  });
+
+export const useBackfillWorklogs = () =>
+  useMutation({
+    mutationFn: ({
+      candidates,
+      accountId,
+      startDate,
+    }: {
+      candidates: Issue[];
+      accountId: string;
+      startDate: string;
+    }) => backfillWorklogs(candidates, accountId, startDate),
   });
