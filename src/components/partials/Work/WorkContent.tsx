@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle2, ListChecks, PartyPopper } from "lucide-react";
-import { PageHeader, LoadingBlock, ErrorBlock, EmptyBlock } from "@/components/common";
+import { PageHeader, LoadingBlock, ErrorBlock, EmptyBlock, JiraLinkGate } from "@/components/common";
 import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useMarkDone, useMyOpenIssues } from "@/hooks/jari";
@@ -18,6 +18,14 @@ const STATUS_OPTIONS: { value: StatusCategory; label: string }[] = [
 ];
 
 export default function WorkContent() {
+  return (
+    <JiraLinkGate title="งานของฉัน" subtitle="คลิกเดียวเพื่อปิดงานเป็น Done" icon={<ListChecks size={22} />}>
+      <WorkBody />
+    </JiraLinkGate>
+  );
+}
+
+function WorkBody() {
   const { user } = useAuth();
   const [statusFilter, setStatusFilter] = useState<StatusCategory[]>(["todo", "inprogress"]);
   const { data, isLoading, isError } = useMyOpenIssues(user?.accountId ?? "", statusFilter);

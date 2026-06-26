@@ -115,6 +115,8 @@ export interface JiraAccountStatus {
   jiraEmail: string;
   accountId: string;
   hasToken: boolean;
+  tokenExpiresAt: string | null;
+  tokenExpired: boolean;
 }
 
 export const getJiraAccount = () => apiGet<JiraAccountStatus>("/auth/jira-account");
@@ -125,7 +127,7 @@ export interface UpdateJiraAccountResult {
   jiraEmail: string;
 }
 
-export const updateJiraAccount = (input: { email: string; token: string }) =>
+export const updateJiraAccount = (input: { email: string; token: string; expiresAt?: string }) =>
   apiPost<UpdateJiraAccountResult>("/auth/jira-account", input);
 
 // ─── Create story + subtasks (#2) ────────────────────────────────────────────

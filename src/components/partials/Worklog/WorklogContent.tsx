@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { CalendarClock, CalendarDays, CheckCircle2, Settings, Sparkles, Timer } from "lucide-react";
-import { PageHeader, LoadingBlock, ErrorBlock, EmptyBlock } from "@/components/common";
+import { PageHeader, LoadingBlock, ErrorBlock, EmptyBlock, JiraLinkGate } from "@/components/common";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Field";
@@ -27,6 +27,14 @@ interface Draft {
 }
 
 export default function WorklogContent() {
+  return (
+    <JiraLinkGate title="ลงเวลางาน (Worklog)" icon={<Timer size={22} />}>
+      <WorklogBody />
+    </JiraLinkGate>
+  );
+}
+
+function WorklogBody() {
   const maxDate = localDateISO(); // today (local) — no logging into the future
   const { user } = useAuth();
   const accountId = user?.accountId ?? "";
