@@ -3,11 +3,17 @@
 import { useMutation } from "@tanstack/react-query";
 import {
   backfillWorklogs,
+  draftStory,
   planWorklogs,
   rewriteText,
   suggestSubtasks,
 } from "@/services/ai.service";
 import type { Issue } from "@/types/app/jira";
+
+export const useDraftStory = () =>
+  useMutation({
+    mutationFn: ({ brief }: { brief: string }) => draftStory(brief),
+  });
 
 export const useRewriteText = () =>
   useMutation({

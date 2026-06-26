@@ -3,7 +3,12 @@
 
 import { apiPost } from "@/lib/api/client";
 import { WORKDAY_SECONDS, formatDuration } from "@/lib/format";
-import type { Issue, WorklogPlanItem } from "@/types/app/jira";
+import type { Issue, StoryDraft, WorklogPlanItem } from "@/types/app/jira";
+
+/** #2 — turn a free-form brief into a ready-to-create Story draft in one call. */
+export async function draftStory(brief: string): Promise<StoryDraft> {
+  return apiPost<StoryDraft>("/ai/draft-story", { brief });
+}
 
 /** #6 — clean up a roughly-typed story title/description. */
 export async function rewriteText(

@@ -121,12 +121,25 @@ export interface Project {
   name: string;
 }
 
+export interface Epic {
+  key: string;
+  summary: string;
+}
+
+/** AI-drafted Story from a free-form brief (#2). */
+export interface StoryDraft {
+  title: string;
+  description: string;
+  subtasks: string[];
+}
+
 export interface CreateStoryInput {
   projectKey: string;
   summary: string;
   description: string;
   priority: Priority;
   assigneeAccountId?: string;
+  epicKey?: string;
   subtasks: string[];
 }
 

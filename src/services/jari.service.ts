@@ -7,6 +7,7 @@ import type {
   CreateStoryInput,
   DailyData,
   DashboardData,
+  Epic,
   Issue,
   JiraUser,
   Project,
@@ -18,6 +19,14 @@ import type {
 export const getProjects = () => apiGet<Project[]>("/projects");
 
 export const getUsers = () => apiGet<JiraUser[]>("/users");
+
+export async function getEpics(projectKey: string): Promise<Epic[]> {
+  if (!projectKey) return [];
+  const { epics } = await apiGet<{ epics: Epic[] }>(
+    `/epics?projectKey=${encodeURIComponent(projectKey)}`,
+  );
+  return epics;
+}
 
 // ─── Dashboard (#1) ──────────────────────────────────────────────────────────
 
@@ -141,6 +150,7 @@ export async function createStory(
     description: input.description,
     priority: input.priority,
     assigneeAccountId: input.assigneeAccountId,
+    epicKey: input.epicKey || undefined,
     subtasks: input.subtasks.map((s) => s.trim()).filter(Boolean),
   });
 }
